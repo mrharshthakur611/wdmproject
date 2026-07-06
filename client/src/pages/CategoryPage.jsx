@@ -1,45 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import ProductCard from '../components/ProductCard'
 
-function formatInr(value) {
-  if (typeof value !== 'number') return ''
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-function ProductCard({ product }) {
-  return (
-    <Link to={`/product/${product.id}`} className="productCard productCardLink">
-      {product.badge ? <div className="badge">{product.badge}</div> : null}
-      <button type="button" className="wishlistMiniBtn" aria-label={`Add ${product.name} to wishlist`}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      <div className="productImgWrap">
-        <img className="productImg" src={product.imageUrl} alt={product.name} />
-      </div>
-      <div className="productInfo">
-        <div className="productName">{product.name}</div>
-        <div className="productPrice productPriceStack">
-          <span className="price">{formatInr(product.price)}</span>
-          {product.unit ? <span className="unit">/ {product.unit}</span> : null}
-        </div>
-        <span className="addBtn">
-          Add to cart
-        </span>
-      </div>
-    </Link>
-  )
+// Mapping categories to material icons
+const CATEGORY_ICONS = {
+  grocery: 'shopping_basket',
+  food: 'restaurant',
+  essentials: 'inventory_2',
+  bakery: 'cake'
 }
 
 function CategoryPage({ category }) {
@@ -57,20 +24,47 @@ function CategoryPage({ category }) {
   }, [category])
 
   const title = category.charAt(0).toUpperCase() + category.slice(1)
+  const icon = CATEGORY_ICONS[category.toLowerCase()] || 'category'
 
   return (
-    <section className="section">
-      <h2 className="sectionTitle">{title}</h2>
+    <main className="w-full px-4 md:px-8 py-8 space-y-8">
+      {/* Category Header */}
+      <div className="flex items-center gap-4 border-b-2 border-outline-variant/20 pb-4">
+        <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center shadow-md">
+          <span className="material-symbols-outlined text-on-primary-container text-[32px]">{icon}</span>
+        </div>
+        <div>
+          <h2 className="font-headline-lg text-on-background m-0 leading-tight">{title}</h2>
+          <p className="text-on-surface-variant text-label-md m-0">{products.length} Products</p>
+        </div>
+      </div>
+
+      {/* Filter/Sort bar (Placeholder) */}
+      <div className="flex justify-between items-center bg-surface-container-low p-4 rounded-lg">
+        <span className="text-on-surface-variant text-[14px]">Showing all {title}</span>
+        <select className="bg-surface border border-outline-variant/30 rounded-lg px-3 py-1.5 text-[14px] text-on-background outline-none">
+          <option>Sort by: Default</option>
+          <option>Price: Low to High</option>
+          <option>Price: High to Low</option>
+        </select>
+      </div>
+
+      {/* Product Grid */}
       {products.length > 0 ? (
-        <div className="productGrid">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <div key={p.id} className="relative">
+              <ProductCard product={p} />
+            </div>
           ))}
         </div>
       ) : (
-        <p>No products found</p>
+        <div className="py-12 text-center text-on-surface-variant bg-surface-container-lowest rounded-xl border border-outline-variant/20">
+          <span className="material-symbols-outlined text-[48px] mb-4 opacity-50">inventory_2</span>
+          <p className="text-body-lg">No products found in {title}</p>
+        </div>
       )}
-    </section>
+    </main>
   )
 }
 

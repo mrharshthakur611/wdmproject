@@ -1,18 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Material Symbols base style */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Shimmer animation utility */
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 :root {
-  --bg: #f8f9fa;
+  --bg: #f9fafa;
   --surface: #ffffff;
-  --text: #121826;
+  --text: #111827;
   --muted: #6b7280;
-  --border: #e7e7ef;
+  --border: #f3f4f6;
   --brand: #f59e0b;
   --brand-dark: #d97706;
   --brand-light: #fef3c7;
   --warning: #ef4444;
-  --shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --glass: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.4);
 
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.45;
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
   color: var(--text);
   background: var(--bg);
   text-rendering: optimizeLegibility;

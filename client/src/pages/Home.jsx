@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import ProductCard from '../components/ProductCard'
 
 function formatInr(value) {
   if (typeof value !== 'number') return ''
@@ -10,226 +11,172 @@ function formatInr(value) {
   }).format(value)
 }
 
-function CategoryPills() {
-  const items = [
-    { label: 'Groceries', path: '/grocery' },
-    { label: 'Food', path: '/food' },
-    { label: 'Essentials', path: '/essentials' },
-    { label: 'Bakery', path: '/bakery' },
-  ]
+// ── Quick Category Icons ───────────────────────────────────────────────────
+const CATEGORY_ICONS = [
+  { label: 'Groceries', icon: 'shopping_basket', path: '/grocery' },
+  { label: 'Food',      icon: 'restaurant',       path: '/food' },
+  { label: 'Essentials',icon: 'inventory_2',      path: '/essentials' },
+  { label: 'Bakery',    icon: 'cake',             path: '/bakery' },
+]
 
+function QuickCategories() {
   return (
-    <div className="categoryPills" role="navigation" aria-label="Categories">
-      {items.map((item) => (
-        <Link key={item.label} className="pill" to={item.path}>
-          {item.label}
+    <section className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-16">
+      {CATEGORY_ICONS.map((cat) => (
+        <Link key={cat.label} to={cat.path} className="flex flex-col items-center gap-sm group cursor-pointer no-underline">
+          <div className="w-24 h-24 md:w-32 md:h-32 bg-primary-container rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+            <span className="material-symbols-outlined text-on-primary-container text-[48px]">{cat.icon}</span>
+          </div>
+          <span className="font-semibold text-body-md text-on-background">{cat.label}</span>
         </Link>
       ))}
-    </div>
-  )
-}
-
-function PromoCard({ tone, eyebrow, title, subtitle, cta }) {
-  return (
-    <div className={`promoCard ${tone || ''}`}>
-      {eyebrow ? <div className="promoEyebrow">{eyebrow}</div> : null}
-      {title ? <div className="promoTitle">{title}</div> : null}
-      {subtitle ? <div className="promoSub">{subtitle}</div> : null}
-      {cta ? (
-        <a className="promoCta" href="#shop">
-          {cta}
-        </a>
-      ) : null}
-    </div>
-  )
-}
-
-function Hero() {
-  return (
-    <section className="hero">
-      <div className="heroGrid">
-        <div className="heroMain">
-          <PromoCard
-            tone="green"
-            eyebrow="Get Discounts on Fresh Vegetables & Fruits"
-            title="Up to - 10%"
-            subtitle="Discount will apply when you order products with our delivery from 11 am - 4 pm"
-            cta="Shop Now"
-          />
-        </div>
-        <div className="heroSide">
-          <PromoCard
-            tone="cream"
-            eyebrow="Save up 30% on"
-            title="The Original Oatly milk"
-            subtitle="Promotion runs 05/10/2024 - 15/01/2024"
-          />
-          <PromoCard
-            tone="blue"
-            eyebrow="Get pack of fish at a discount"
-            title="Every 3rd unit"
-            subtitle="Limited weekly deal"
-          />
-        </div>
-      </div>
-
-      <div className="heroStrip">
-        <PromoCard tone="light" eyebrow="Free Delivery" title="On orders above ₹199" />
-        <PromoCard tone="light" eyebrow="For Own Baked Goods" title="Fresh daily items" />
-        <PromoCard tone="light" eyebrow="Save up to 35% on" title="Energy Drinks" cta="Shop Now" />
-      </div>
     </section>
   )
 }
 
-function FeatureStrip() {
-  const items = [
-    { title: 'Fresh Products Every Day', sub: 'Curated for Mussoorie' },
-    { title: 'Safe Payment With Any Bank Card', sub: 'Fast and secure checkout' },
-    { title: '24/7 Support', sub: 'Always be there for you' },
-  ]
-
+// ── Hero Bento Grid ────────────────────────────────────────────────────────
+function HeroBento() {
   return (
-    <section className="features" aria-label="Highlights">
-      {items.map((item) => (
-        <div key={item.title} className="feature">
-          <div className="featureIcon" aria-hidden="true"></div>
-          <div className="featureText">
-            <div className="featureTitle">{item.title}</div>
-            <div className="featureSub">{item.sub}</div>
+    <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Main hero card */}
+      <div className="lg:col-span-2 relative h-[300px] md:h-[450px] rounded-xl overflow-hidden shadow-md group">
+        <div className="absolute inset-0 bg-[#FFF9E5]"></div>
+        <div className="absolute inset-0 flex items-center px-lg md:px-xl z-10">
+          <div className="max-w-md space-y-md">
+            <span className="px-md py-1 bg-primary text-white text-label-md rounded-full inline-block">FASTEST DELIVERY</span>
+            <h2 className="font-display-lg text-on-background leading-tight m-0">
+              Order Your <br /><span className="text-primary">Food, Snacks</span>
+            </h2>
+            <Link to="/grocery" className="inline-block bg-on-background text-background px-xl py-md rounded-lg font-headline-md hover:scale-105 transition-transform no-underline">
+              Shop Now
+            </Link>
           </div>
         </div>
-      ))}
-    </section>
-  )
-}
-
-function ProductCard({ product }) {
-  return (
-    <Link to={`/product/${product.id}`} className="productCard productCardLink">
-      {product.badge ? <div className="badge">{product.badge}</div> : null}
-      <button type="button" className="wishlistMiniBtn" aria-label={`Add ${product.name} to wishlist`}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      <div className="productImgWrap">
-        <img className="productImg" src={product.imageUrl} alt={product.name} />
+        <img
+          className="absolute right-0 bottom-0 h-4/5 w-1/2 object-contain object-bottom group-hover:translate-x-2 transition-transform duration-700"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWQRtpBME0s1rdFS1zLwcJrMC0Bs0eS5S_CP5ffxte8E7DV9XQOGcD_85cpLKLASeQghsPv3S8x4v1Jo99B05RFsstbbFtCUW5I6d5Sv1ZyAz94Tk2dHNuOPICYhFIcLlgmmaUVVnB_7km5CUUKQQ5tqfZXNIlCyKYtFHQxxq3ven_BcQlK2xyLw9OhsDR_LK0qnIq2VnVsyl4WAHCMVlYNfo5hv5tJzNaYeYkIF2TY-Fp9xvlc6DXLgXVzBfxpIoONlESaGl-UEA"
+          alt="Grocery bag overflowing with fresh vegetables and snacks"
+        />
       </div>
-      <div className="productInfo">
-        <div className="productName">{product.name}</div>
-        <div className="productPrice productPriceStack">
-          <span className="price">{formatInr(product.price)}</span>
-          {product.unit ? <span className="unit">/ {product.unit}</span> : null}
+
+      {/* Side card */}
+      <div className="bg-[#00D094] rounded-xl relative h-[300px] md:h-[450px] p-lg flex flex-col justify-between overflow-hidden shadow-md">
+        <div className="z-10 space-y-xs">
+          <h3 className="text-white font-display-lg leading-none m-0">24×7 SUPPORT</h3>
+          <p className="text-white/90 font-label-md m-0">From We Deliver Mussoorie Team</p>
         </div>
-        <span className="addBtn">
-          Add to cart
-        </span>
-      </div>
-    </Link>
-  )
-}
-
-function Section({ title, action, children }) {
-  return (
-    <section className="section">
-      <div className="sectionHead">
-        <h2 className="sectionTitle">{title}</h2>
-        {action ? (
-          <a className="sectionAction" href="#shop">
-            {action}
+        <div className="relative z-10">
+          <a href="tel:7420097008" className="inline-block bg-error text-white px-md py-xs rounded-lg font-label-md hover:opacity-90 transition-colors no-underline">
+            CALL NOW
           </a>
-        ) : null}
+        </div>
+        <img
+          className="absolute right-0 bottom-0 w-full h-2/3 object-contain object-right-bottom"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-AG14XXSbiJ6FoTaIUfQhzvAvQdbRowBOKYSG3Cn2TWwmdJD9aoO0n2ZgW9WumriSK9jLfN2ki0MuYj5sDBQh6dPbzGbxHHk9z0ZtLBitvoYrCbB8f5kVMVStdiMivCUHpRvmo3yDKvIHEbKNN4ah0uRVPI1qgo5ZZAcKw1Kde6J-suqUqfoI7XQB08qe2L_g-ebbiO1Wv19tkghvFibbLYVfE9GtktFvPuQsLGAqOU_vGX5ZOwkvotdyegkuzxCSQsjV6HOSEu8"
+          alt="Delivery executive on scooter"
+        />
       </div>
-      {children}
     </section>
   )
 }
 
-function CategoryGrid() {
-  const items = [
-    {
-      title: 'GROCERY',
-      imageUrl: '/wdm-images/cat-groceries.jpg',
-      path: '/grocery',
-    },
-    {
-      title: 'ESSENTIALS',
-      imageUrl: '/wdm-images/cat-party.jpg',
-      path: '/essentials',
-    },
-    {
-      title: 'BAKERY',
-      imageUrl: '/wdm-images/cat-cakes.jpg',
-      path: '/bakery',
-    },
-  ]
-
+// ── Trust Features Bar ─────────────────────────────────────────────────────
+function TrustBar() {
   return (
-    <div className="categoryGrid">
-      {items.map((item) => (
-        <Link key={item.title} className="categoryCard" to={item.path}>
-          <img className="categoryImg" src={item.imageUrl} alt={item.title} />
-          <div className="categoryTitle">{item.title}</div>
-        </Link>
-      ))}
-    </div>
+    <section className="bg-surface-container-lowest py-8 px-6 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6 border border-outline-variant/20">
+      <div className="flex items-center gap-md justify-center border-b md:border-b-0 md:border-r border-outline-variant/20 pb-md md:pb-0">
+        <span className="material-symbols-outlined text-primary text-headline-lg" style={{ fontVariationSettings: "'FILL' 1" }}>eco</span>
+        <div className="text-center md:text-left">
+          <h4 className="font-semibold text-body-md m-0">Fresh Products</h4>
+          <p className="text-label-sm text-on-surface-variant m-0">Guaranteed quality every day</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-md justify-center border-b md:border-b-0 md:border-r border-outline-variant/20 pb-md md:pb-0">
+        <span className="material-symbols-outlined text-primary text-headline-lg" style={{ fontVariationSettings: "'FILL' 1" }}>credit_card</span>
+        <div className="text-center md:text-left">
+          <h4 className="font-semibold text-body-md m-0">Safe Payment</h4>
+          <p className="text-label-sm text-on-surface-variant m-0">With any major bank card</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-md justify-center">
+        <span className="material-symbols-outlined text-primary text-headline-lg" style={{ fontVariationSettings: "'FILL' 1" }}>support_agent</span>
+        <div className="text-center md:text-left">
+          <h4 className="font-semibold text-body-md m-0">24/7 Support</h4>
+          <p className="text-label-sm text-on-surface-variant m-0">Always here to help you</p>
+        </div>
+      </div>
+    </section>
   )
 }
 
+
+// ── Products Section ───────────────────────────────────────────────────────
+function ProductsSection({ title, actionLabel, actionPath, products }) {
+  return (
+    <section className="space-y-4">
+      <div className="flex justify-between items-end border-b-2 border-outline-variant/20 pb-2">
+        <h3 className="font-headline-lg text-on-background m-0">{title}</h3>
+        {actionLabel && (
+          <Link to={actionPath || '#'} className="text-primary font-label-md hover:underline no-underline">
+            {actionLabel}
+          </Link>
+        )}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {products.map((p) => (
+          <div key={p.id} className="relative">
+            <ProductCard product={p} />
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// ── Home Page ──────────────────────────────────────────────────────────────
 function Home() {
-  const [weeklyDiscounts, setWeeklyDiscounts] = useState([])
   const [recentlyViewed, setRecentlyViewed] = useState([])
+  const [weeklyDiscounts, setWeeklyDiscounts] = useState([])
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/products?section=weekly-discounts').then((r) => r.json()),
       fetch('/api/products?section=recently-viewed').then((r) => r.json()),
+      fetch('/api/products?section=weekly-discounts').then((r) => r.json()),
     ])
-      .then(([weekly, recent]) => {
-        setWeeklyDiscounts(Array.isArray(weekly) ? weekly : [])
+      .then(([recent, weekly]) => {
         setRecentlyViewed(Array.isArray(recent) ? recent : [])
+        setWeeklyDiscounts(Array.isArray(weekly) ? weekly : [])
       })
       .catch(() => {
-        setWeeklyDiscounts([])
         setRecentlyViewed([])
+        setWeeklyDiscounts([])
       })
   }, [])
 
   return (
-    <>
-      <CategoryPills />
-      <Hero />
-      <FeatureStrip />
+    <main className="w-full px-4 md:px-8 py-8 space-y-12">
+      <QuickCategories />
+      <HeroBento />
+      <TrustBar />
 
-      <Section title="Recently Viewed">
-        <div className="rowScroll">
-          {recentlyViewed.map((p) => (
-            <div key={p.id} className="rowItem">
-              <ProductCard product={p} />
-            </div>
-          ))}
-        </div>
-      </Section>
+      {recentlyViewed.length > 0 && (
+        <ProductsSection
+          title="Recently Viewed"
+          actionLabel="View All"
+          actionPath="/grocery"
+          products={recentlyViewed.slice(0, 5)}
+        />
+      )}
 
-      <Section title="Popular Categories">
-        <CategoryGrid />
-      </Section>
-
-      <Section title="Weekly Discounts" action="All Products">
-        <div className="productGrid">
-          {weeklyDiscounts.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </Section>
-    </>
+      {weeklyDiscounts.length > 0 && (
+        <ProductsSection
+          title="Weekly Discounts"
+          actionLabel="All Products"
+          actionPath="/grocery"
+          products={weeklyDiscounts.slice(0, 5)}
+        />
+      )}
+    </main>
   )
 }
 
