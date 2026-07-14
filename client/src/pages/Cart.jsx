@@ -24,7 +24,7 @@ function formatInr(value) {
 
 function Cart() {
   const { cartItems, updateQuantity, removeFromCart, cartTotal, clearCart } = useCart()
-  const { token, isAuthenticated } = useAuth()
+  const { token, isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   
   const [loading, setLoading] = useState(false)
@@ -39,12 +39,32 @@ function Cart() {
     setLoading(true)
     setError(null)
     
-    // Mock shipping address
+    const chosenAddress = user?.addresses?.shipping || user?.addresses?.billing
+    if (!chosenAddress) {
+      setError('Please add your address in My Account → Addresses before checkout.')
+      setLoading(false)
+      navigate('/account/addresses')
+      return
+    }
+
     const shippingAddress = {
-      street: '123 Mall Road',
-      city: 'Mussoorie',
-      state: 'Uttarakhand',
-      pincode: '248179'
+      fullName: chosenAddress.fullName || user?.name || '',
+      phone: chosenAddress.phone || user?.phone || '',
+      street: chosenAddress.line1 || chosenAddress.street || '',
+      line1: chosenAddress.line1 || '',
+      line2: chosenAddress.line2 || '',
+      landmark: chosenAddress.landmark || '',
+      city: chosenAddress.city || '',
+      state: chosenAddress.state || '',
+      pincode: chosenAddress.pincode || '',
+      country: chosenAddress.country || 'India',
+    }
+
+    if (!shippingAddress.street || !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
+      setError('Your saved address is incomplete. Please update it in My Account → Addresses.')
+      setLoading(false)
+      navigate('/account/addresses')
+      return
     }
 
     const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js')
@@ -55,6 +75,16 @@ function Cart() {
     }
 
     try {
+      const keyRes = await fetch('/api/razorpay/key', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const keyData = await keyRes.json()
+      if (!keyRes.ok) {
+        throw new Error(keyData.message || 'Failed to load Razorpay key')
+      }
+
       const orderResponse = await fetch('/api/orders/razorpay', {
         method: 'POST',
         headers: {
@@ -70,7 +100,7 @@ function Cart() {
       }
 
       const options = {
-        key: 'rzp_test_T6CbEXWqt5AxZR',
+        key: keyData.key,
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'We Deliver Mussoorie',

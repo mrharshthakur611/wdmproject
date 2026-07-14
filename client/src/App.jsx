@@ -13,22 +13,20 @@ import LoginRegister from './pages/LoginRegister'
 import Cart from './pages/Cart'
 import Wishlist from './pages/Wishlist'
 import ProductPage from './pages/ProductPage'
+import VerifyEmail from './pages/VerifyEmail'
 import AdminDashboard from './admin/AdminDashboard'
 import AdminProducts from './admin/AdminProducts'
 import AdminOrders from './admin/AdminOrders'
 import AdminUsers from './admin/AdminUsers'
 import AdminRoute from './admin/AdminRoute'
-
-function formatInr(value) {
-  if (typeof value !== 'number') return ''
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-import { useAuth } from './context/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
+import AccountLayout from './pages/account/AccountLayout'
+import AccountDashboard from './pages/account/AccountDashboard'
+import AccountOrders from './pages/account/AccountOrders'
+import AccountDownloads from './pages/account/AccountDownloads'
+import AccountAddresses from './pages/account/AccountAddresses'
+import AccountDetails from './pages/account/AccountDetails'
+import AccountWishlist from './pages/account/AccountWishlist'
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -64,8 +62,17 @@ function App() {
                   <Route path="/essentials" element={<Essentials />} />
                   <Route path="/bakery" element={<Bakery />} />
                   <Route path="/login" element={<LoginRegister />} />
+                  <Route path="/verify-email" element={<VerifyEmail />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/account" element={<ProtectedRoute><AccountLayout /></ProtectedRoute>}>
+                    <Route index element={<AccountDashboard />} />
+                    <Route path="orders" element={<AccountOrders />} />
+                    <Route path="downloads" element={<AccountDownloads />} />
+                    <Route path="addresses" element={<AccountAddresses />} />
+                    <Route path="details" element={<AccountDetails />} />
+                    <Route path="wishlist" element={<AccountWishlist />} />
+                  </Route>
                   <Route path="/product/:productId" element={<ProductPage />} />
                 </Routes>
               </main>

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 const ORDER_STATUSES = ['Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
 
 function StatusBadge({ status }) {
-  const s = status?.toLowerCase().replace(' ', '')
+  const s = status?.toLowerCase().replace(/\s+/g, '')
   const getBadgeStyle = () => {
     switch(s) {
       case 'delivered':
@@ -30,7 +30,7 @@ function StatusBadge({ status }) {
 }
 
 function PaymentBadge({ status }) {
-  const s = status?.toLowerCase().replace(' ', '')
+  const s = status?.toLowerCase().replace(/\s+/g, '')
   const getBadgeStyle = () => {
     switch(s) {
       case 'paid':
@@ -99,8 +99,26 @@ function OrderDetailModal({ order, onClose, onStatusUpdate }) {
             <div className="bg-surface-container-low border border-outline-variant/30 rounded-xl p-5">
               <div className="text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-3">Shipping Address</div>
               <div className="text-[14px] text-on-background leading-relaxed">
-                {order.shippingAddress?.street}, {order.shippingAddress?.city}<br />
-                {order.shippingAddress?.state} — <span className="font-bold">{order.shippingAddress?.pincode}</span>
+                {order.shippingAddress?.fullName && (
+                  <>
+                    <div className="font-bold">{order.shippingAddress.fullName}</div>
+                  </>
+                )}
+                {order.shippingAddress?.phone && (
+                  <div className="text-on-surface-variant text-[13px]">{order.shippingAddress.phone}</div>
+                )}
+                <div className="mt-2">
+                  {(order.shippingAddress?.line1 || order.shippingAddress?.street) && (
+                    <div>{order.shippingAddress?.line1 || order.shippingAddress?.street}</div>
+                  )}
+                  {order.shippingAddress?.line2 && <div>{order.shippingAddress.line2}</div>}
+                  {order.shippingAddress?.landmark && <div>{order.shippingAddress.landmark}</div>}
+                  <div>
+                    {order.shippingAddress?.city}{order.shippingAddress?.city ? ', ' : ''}{order.shippingAddress?.state}{order.shippingAddress?.state ? ' — ' : ''}
+                    <span className="font-bold">{order.shippingAddress?.pincode}</span>
+                  </div>
+                  {order.shippingAddress?.country && <div>{order.shippingAddress.country}</div>}
+                </div>
               </div>
             </div>
           </div>
@@ -113,8 +131,8 @@ function OrderDetailModal({ order, onClose, onStatusUpdate }) {
               {order.items?.map((item, i) => (
                 <div key={i} className="flex justify-between items-center pb-4 border-b border-outline-variant/20 last:border-0 last:pb-0">
                   <div className="flex items-center gap-3">
-                    {item.imageUrl && (
-                       <img src={item.imageUrl} alt={item.name} className="w-12 h-12 rounded object-contain bg-white p-1 border border-outline-variant/30" />
+                    {(item.image || item.imageUrl) && (
+                       <img src={item.image || item.imageUrl} alt={item.name} className="w-12 h-12 rounded object-contain bg-white p-1 border border-outline-variant/30" />
                     )}
                     <div>
                       <div className="font-bold text-on-background text-[14px]">{item.name}</div>
@@ -173,10 +191,44 @@ export default function AdminOrders() {
   const [filterStatus, setFilterStatus] = useState('All')
 
   useEffect(() => {
-    fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(data => { setOrders(Array.isArray(data) ? data : []); setLoading(false) })
-      .catch(() => { setError('Failed to load orders'); setLoading(false) })
+    let cancelled = false
+
+    const loadOrders = async () => {
+      if (!token) {
+        setOrders([])
+        setError('Not authenticated')
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+
+      try {
+        const res = await fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } })
+        const data = await res.json().catch(() => null)
+
+        if (!res.ok) {
+          throw new Error(data?.message || `Failed to load orders (${res.status})`)
+        }
+
+        if (cancelled) return
+
+        setOrders(Array.isArray(data) ? data : [])
+        setLoading(false)
+      } catch (err) {
+        if (cancelled) return
+        setOrders([])
+        setError(err?.message || 'Failed to load orders')
+        setLoading(false)
+      }
+    }
+
+    loadOrders()
+
+    return () => {
+      cancelled = true
+    }
   }, [token])
 
   const handleStatusUpdate = (updated) => {

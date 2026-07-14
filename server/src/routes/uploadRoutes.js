@@ -1,0 +1,39 @@
+const express = require("express");
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
+const { protect } = require("../middleware/authMiddleware");
+const { adminOnly } = require("../middleware/adminMiddleware");
+
+const router = express.Router();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "wdm-products", // The folder in cloudinary
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// POST /api/admin/upload
+router.post("/upload", protect, adminOnly, upload.single("image"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image provided" });
+    }
+    // req.file.path contains the public Cloudinary URL
+    res.json({ imageUrl: req.file.path });
+  } catch (error) {
+    res.status(500).json({ message: "Image upload failed", error: error.message });
+  }
+});
+
+module.exports = router;

@@ -10,11 +10,13 @@ export default function Header({ toggleSidebar }) {
   const { cartItemCount, cartItems } = useCart()
   const { wishlistCount } = useWishlist()
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
     setIsCartOpen(false)
+    setIsProfileOpen(false)
   }, [location.pathname])
 
   useEffect(() => {
@@ -27,6 +29,18 @@ export default function Header({ toggleSidebar }) {
   const openCart = () => setIsCartOpen(true)
   const closeCart = () => setIsCartOpen(false)
   const viewFullCart = () => { setIsCartOpen(false); navigate('/cart') }
+  const handleLogout = () => { setIsProfileOpen(false); logout(); navigate('/') }
+
+  useEffect(() => {
+    if (!isProfileOpen) return
+    const onPointerDown = (e) => {
+      if (!e.target.closest('[data-profile-menu-root="true"]')) {
+        setIsProfileOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [isProfileOpen])
 
   return (
     <>
@@ -46,10 +60,47 @@ export default function Header({ toggleSidebar }) {
               <span>Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ''}</span>
             </Link>
             {isAuthenticated ? (
-              <button onClick={logout} className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-[12px] font-inherit p-0">
-                <span className="material-symbols-outlined text-[16px]">logout</span>
-                <span>Logout ({user?.name?.split(' ')[0]})</span>
-              </button>
+              <div
+                data-profile-menu-root="true"
+                className="relative"
+                onMouseEnter={() => setIsProfileOpen(true)}
+                onMouseLeave={() => setIsProfileOpen(false)}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsProfileOpen((v) => !v)}
+                  className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-[12px] font-inherit p-0"
+                  aria-haspopup="menu"
+                  aria-expanded={isProfileOpen}
+                >
+                  <span className="material-symbols-outlined text-[16px]">person</span>
+                  <span>Hello, {user?.name || 'Account'}</span>
+                  <span className="material-symbols-outlined text-[16px]">expand_more</span>
+                </button>
+
+                <div
+                  className={[
+                    'absolute right-0 mt-2 w-56 z-[60] bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden transition-all origin-top-right',
+                    isProfileOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible',
+                  ].join(' ')}
+                  role="menu"
+                >
+                  <Link onClick={() => setIsProfileOpen(false)} to="/account" className="block px-4 py-3 text-[13px] text-on-surface-variant hover:bg-surface-container-low transition-colors no-underline">Dashboard</Link>
+                  <Link onClick={() => setIsProfileOpen(false)} to="/account/orders" className="block px-4 py-3 text-[13px] text-on-surface-variant hover:bg-surface-container-low transition-colors no-underline">Orders</Link>
+                  <Link onClick={() => setIsProfileOpen(false)} to="/account/downloads" className="block px-4 py-3 text-[13px] text-on-surface-variant hover:bg-surface-container-low transition-colors no-underline">Downloads</Link>
+                  <Link onClick={() => setIsProfileOpen(false)} to="/account/addresses" className="block px-4 py-3 text-[13px] text-on-surface-variant hover:bg-surface-container-low transition-colors no-underline">Addresses</Link>
+                  <Link onClick={() => setIsProfileOpen(false)} to="/account/details" className="block px-4 py-3 text-[13px] text-on-surface-variant hover:bg-surface-container-low transition-colors no-underline">Account details</Link>
+                  <Link onClick={() => setIsProfileOpen(false)} to="/account/wishlist" className="block px-4 py-3 text-[13px] text-on-surface-variant hover:bg-surface-container-low transition-colors no-underline">Wishlist</Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-3 text-[13px] text-on-surface-variant hover:bg-surface-container-low transition-colors bg-transparent border-none cursor-pointer"
+                    role="menuitem"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
             ) : (
               <Link to="/login" className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
                 <span className="material-symbols-outlined text-[16px]">person</span> Login / Register
